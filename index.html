@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Welch · Welch ads: Monday&#39;s changes, the old campaigns against ours, and our plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f5f3;--card:#ffffff;--ink:#141310;--muted:#6e6e73;--brand:#d70926;--accent:#f2a9b3;--bad:#d70926;--good:#2f7d4e;--line:#e4e2df;--plain:color-mix(in srgb,var(--muted) 42%,color-mix(in srgb,var(--accent) 40%,var(--bg)));--soft:color-mix(in srgb,var(--ink) 60%,var(--muted))}
+/* The report look (the Mokomoko recovery deck, 2026-10-02). The colors come from the client's brand as :root
+   variables, written by render.rs above this file: --bg --card --ink --muted --brand --accent --bad --good --line,
+   and two mixed from them: --plain (a quiet bar or dot) and --soft (body text a little lighter than the ink).
+
+   Two layouts:
+   - The stage (a laptop or larger): one 1280 x 720 slide at a time, scaled to fit the window, moved by keys, clicks,
+     and swipes. The stage is never scaled below 0.85, so the smallest text (16.5 px) reads at 14 px or more.
+   - The page (a phone, a tablet, a short window): every slide is a full-width section, one under the other, read by
+     scrolling. Each section animates in when it scrolls into view. Charts switch to their phone drawing.
+   The page layout's media query is the same in deck.js (PAGE): change both together. It is for screens only: a print
+   is always the stage's slides, one a page. */
+
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,sans-serif;overflow:hidden}
+p,li{text-wrap:pretty}
+/* Short blocks wrap balanced, so no line ends with one word alone (Will: no orphan words, 2026-09-15). */
+.tile b,.tile span,.fixes b,.fixes span,.cap,.stats span,.lead{text-wrap:balance}
+h1,h2{text-wrap:balance}
+.stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center}
+section{position:absolute;inset:0;padding:64px 100px;display:flex;flex-direction:column;gap:18px;opacity:0;pointer-events:none;transition:opacity .5s}
+section.active{opacity:1;pointer-events:auto}
+.kicker{font-size:16.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+h1{font-size:58px;line-height:1.08;font-weight:800;letter-spacing:-.02em;max-width:900px}
+h2{font-size:42px;line-height:1.12;font-weight:800;letter-spacing:-.02em}
+.lead{font-size:21px;line-height:1.45;color:var(--soft);max-width:1000px}
+.cap{font-size:16.5px;color:var(--muted);margin-top:6px}
+.title{justify-content:center;gap:26px}
+.title .logo{height:96px;width:auto;max-width:320px;object-fit:contain;border-radius:22px;align-self:flex-start}
+.sub{font-size:20px;color:var(--muted)}
+.anim{opacity:0;transform:translateY(18px)}
+.active .anim{animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
+@keyframes rise{to{opacity:1;transform:none}}
+
+/* Charts: inline SVG. Each chart is drawn twice: .big for the stage, .phone (a narrow drawing with bigger labels)
+   for the page layout. A tone class sets --c, the color its bars, line, and dots take. */
+.t-plain{--c:var(--plain)} .t-bad{--c:var(--bad)} .t-good{--c:var(--good)} .t-brand{--c:var(--brand)} .t-accent{--c:var(--accent)}
+.chart{width:100%;height:auto;overflow:visible;display:block}
+.chart.phone{display:none}
+.chart .bar{fill:var(--c);transform-box:fill-box;transform-origin:bottom;transform:scaleY(0)}
+.active .chart .bar{animation:grow .5s ease-out forwards;animation-delay:calc(.35s + var(--i)*6ms)}
+@keyframes grow{to{transform:scaleY(1)}}
+.chart .axis{font-size:14px;fill:var(--muted)}
+.chart .axis.halo{paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}
+.chart .val{font-size:15px;font-weight:700;fill:var(--ink)}
+.chart .rowlbl{font-size:16px;fill:var(--ink)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .mark{stroke:var(--ink);stroke-dasharray:4 4;stroke-width:1.5}
+.chart .note{font-size:14px;font-weight:600;fill:var(--ink)}
+.chart .line{fill:none;stroke:var(--c);stroke-width:3;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+.active .chart .line{animation:draw 2.2s ease-in-out .4s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.chart .hit{fill:transparent;cursor:crosshair}
+.chart .hov{fill:var(--c);stroke:#fff;stroke-width:3;opacity:0;pointer-events:none;transition:opacity .15s}
+.chart .hovline{stroke:var(--ink);stroke-width:1;opacity:0;pointer-events:none}
+.chart.hovering .hovline{opacity:.35} .chart.hovering .hov.on{opacity:1}
+.chart .wdot{fill:var(--c);opacity:0}
+.chart .wval{font-size:15px;font-weight:700;fill:var(--ink);opacity:0}
+.active .chart .wdot,.active .chart .wval{animation:fade .3s ease-out forwards;animation-delay:calc(.5s + var(--i)*110ms)}
+@keyframes fade{to{opacity:1}}
+.chart .hbar{fill:var(--c);transform-box:fill-box;transform-origin:left;transform:scaleX(0)}
+.active .chart .hbar{animation:growx .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(.5s + var(--i)*40ms)}
+@keyframes growx{to{transform:scaleX(1)}}
+.chart.small{max-width:820px}
+.chart.phone .axis,.chart.phone .note,.chart.phone .val,.chart.phone .wval{font-size:13px}
+.chart.phone .rowlbl{font-size:14px} .chart.phone .line{stroke-width:2.5}
+.tip{position:fixed;z-index:9;pointer-events:none;background:var(--ink);color:#fff;font-size:14px;font-weight:600;padding:8px 12px;border-radius:8px;white-space:nowrap;opacity:0;transform:translate(-50%,calc(-100% - 14px));transition:opacity .12s}
+.tip.on{opacity:1}
+
+/* Views of one chart with a toggle (Daily / Weekly). */
+.views{position:relative}
+.views .v{display:none} .views .v.on{display:block}
+.toggle{position:absolute;right:0;top:-58px;display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;z-index:2}
+.toggle button{font:600 16.5px Inter,system-ui,sans-serif;color:var(--muted);background:none;border:0;border-radius:999px;padding:8px 18px;cursor:pointer}
+.toggle button.on{background:var(--brand);color:#fff}
+
+.stats{display:flex;align-items:center;gap:28px}
+.stats div{display:flex;flex-direction:column}
+.stats em{font-style:normal;font-size:52px;font-weight:800;letter-spacing:-.02em}
+.stats span{font-size:16.5px;color:var(--muted)}
+.stats .arrow{font-size:40px;color:var(--muted)}
+.bad,.bad em,.bad b{color:var(--bad)} .good,.good em,.good b{color:var(--good)}
+.brandtone,.brandtone em,.brandtone b{color:var(--brand)} .accenttone,.accenttone em,.accenttone b{color:var(--accent)}
+p.good,p.bad{font-size:19px;font-weight:600}
+.legend{white-space:nowrap}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin:0 4px 0 10px;vertical-align:-1px;background:var(--c)}
+
+/* A chart with a short list beside it. */
+.split{display:grid;grid-template-columns:3fr 1fr;gap:36px;align-items:end}
+.months{display:flex;flex-direction:column;gap:8px}
+.months .top{margin:0 0 4px}
+.months div{display:flex;justify-content:space-between;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px}
+.months span{color:var(--muted);font-size:16.5px} .months b{font-size:30px;font-weight:800}
+
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:6px}
+.tile{--d:0s;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;min-height:170px}
+.tile b{font-size:19px} .tile span{font-size:16.5px;line-height:1.4;color:var(--soft)}
+.ck{width:30px;height:30px;flex:none;border-radius:50%;background:var(--good);padding:5px}
+.ck path{fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:24}
+.active .ck path{animation:tick .5s ease-out forwards;animation-delay:calc(var(--d) + .3s)}
+@keyframes tick{to{stroke-dashoffset:0}}
+
+/* Search result mock-ups. */
+.serps{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:8px}
+.serp{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 26px;display:flex;flex-direction:column;gap:14px}
+.serp .q{border:1px solid #dadce0;border-radius:24px;padding:10px 20px;font-size:18px;color:#202124}
+.serp ol{padding-left:22px;display:flex;flex-direction:column;gap:10px}
+.serp li b{display:block;font-size:17px;color:#1a0dab;font-weight:500}
+.serp li span{font-size:16.5px;color:var(--muted)}
+.serp li.us b{color:var(--good);font-weight:700}
+
+/* Numbered steps. */
+.fixes{list-style:none;padding:0;display:flex;flex-direction:column;gap:14px;margin-top:6px}
+.fixes li{display:flex;gap:18px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 22px}
+.fixes i{font-style:normal;font-size:17px;flex:none;width:36px;height:36px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700}
+.fixes li>div{flex:1}
+.fixes b{display:block;font-size:20px} .fixes span{font-size:16.5px;color:var(--soft);line-height:1.4}
+.fixes .when{font-style:normal;flex:none;font-size:16.5px;font-weight:600;color:var(--brand);align-self:center}
+
+nav{position:fixed;left:0;right:0;bottom:0;height:4px;background:var(--line)}
+nav i{display:block;height:100%;background:var(--brand);transition:width .4s}
+.count{position:fixed;right:18px;bottom:12px;font-size:14px;color:var(--muted)}
+.hint{position:fixed;left:18px;bottom:12px;font-size:14px;color:var(--muted)}
+
+/* The page layout: phones, tablets, short windows. Keep in step with PAGE in deck.js. */
+@media screen and (max-width:1087px),screen and (max-height:611px){
+  html,body{height:auto;overflow-x:hidden;overflow-y:visible}
+  .stage{position:static;width:auto;height:auto;transform:none!important}
+  section{position:relative;inset:auto;padding:44px 16px;gap:16px;opacity:1;pointer-events:auto;border-bottom:1px solid var(--line)}
+  section:last-child{border-bottom:0;padding-bottom:64px}
+  section.title{min-height:72vh}
+  .kicker{font-size:14px}
+  h1{font-size:36px} h2{font-size:27px;line-height:1.18}
+  .lead{font-size:17px}
+  .cap{font-size:14px}
+  .sub{font-size:16px}
+  .title .logo{height:72px;border-radius:16px}
+  .chart.big{display:none} .chart.phone{display:block}
+  .chart.small{max-width:none}
+  .chart.phone{max-width:640px}
+  .views{display:flex;flex-direction:column}
+  .toggle{position:static;align-self:flex-start;margin-bottom:12px}
+  .toggle button{font-size:15px;min-height:44px;padding:10px 20px}
+  .stats{flex-direction:column;align-items:flex-start;gap:4px}
+  .stats em{font-size:40px}
+  .stats span{font-size:14px}
+  .stats .arrow{font-size:30px;line-height:1;transform:rotate(90deg);margin:2px 0 2px 8px}
+  .split{grid-template-columns:1fr;gap:20px}
+  .months span{font-size:15px} .months b{font-size:24px}
+  .tiles{grid-template-columns:1fr;gap:10px}
+  .tile{min-height:0;padding:16px}
+  .tile b{font-size:17px} .tile span{font-size:15px}
+  .serps{grid-template-columns:1fr;gap:16px}
+  .serp{padding:18px}
+  .serp li span{font-size:14px}
+  .fixes li{padding:14px 16px;gap:14px}
+  .fixes i{width:32px;height:32px}
+  .fixes b{font-size:17px} .fixes span{font-size:15px}
+  .fixes li{flex-wrap:wrap}
+  .fixes .when{font-size:14px;align-self:flex-start;margin-left:46px;width:calc(100% - 46px)}
+  p.good,p.bad{font-size:17px}
+  nav,.hint,.count{display:none}
+  .tip{white-space:normal;max-width:calc(100vw - 32px);font-size:14px}
+}
+
+/* Printed: one slide per landscape page, every slide shown, nothing moving (the still rules below), no navigation. */
+@media print{
+  @page{size:1280px 720px;margin:0}
+  html,body{height:auto;overflow:visible;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .stage{position:static;width:1280px;height:auto;transform:none!important}
+  section{position:relative;inset:auto;width:1280px;height:720px;opacity:1;overflow:hidden;background:var(--bg);break-after:page;break-inside:avoid}
+  section:last-child{break-after:auto}
+  nav,.hint,.count,.tip,.toggle{display:none!important}
+}
+
+.still *,.still *::before,.still *::after{animation:none!important;transition:none!important}
+.still .anim{opacity:1;transform:none}
+.still .chart .bar,.still .chart .hbar{transform:none}
+.still .chart .line{stroke-dashoffset:0}
+.still .chart .wdot,.still .chart .wval{opacity:1}
+.still .ck path{stroke-dashoffset:0}
+@media print{
+*,*::before,*::after{animation:none!important;transition:none!important}
+.anim{opacity:1;transform:none}
+.chart .bar,.chart .hbar{transform:none}
+.chart .line{stroke-dashoffset:0}
+.chart .wdot,.chart .wval{opacity:1}
+.ck path{stroke-dashoffset:0}
+}
+@media (prefers-reduced-motion:reduce){
+*,*::before,*::after{animation:none!important;transition:none!important}
+.anim{opacity:1;transform:none}
+.chart .bar,.chart .hbar{transform:none}
+.chart .line{stroke-dashoffset:0}
+.chart .wdot,.chart .wval{opacity:1}
+.ck path{stroke-dashoffset:0}
+}
+</style></head>
+<body><div class="stage">
+<section class="title">
+  <img class="anim logo" style="--d:.1s" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzE0IiBoZWlnaHQ9IjEyMiIgdmlld0JveD0iMCAwIDMxNCAxMjIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMF8xMzUzMF8yMjYxMDgpIj4KPHBhdGggZD0iTTU1LjE0IDQwLjUyNjlMNDMuNzU1NyA2Ny4zOTI2SDQzLjYyNzdMNDIuOTM3NCA0MC41MjY5SDI5LjA4MTRMMTYuODk1NSA2Ny4zOTI2SDE2Ljc3M0wxNi44MTc2IDQwLjUyNjlIMEwzLjQ1MTQ3IDg0LjUxMDhIMjAuNTE0TDMxLjc0NzkgNjAuMTE2N0gzMS44NzA0TDMyLjY1NTMgODQuNTEwOEg0OS43MTc4TDcxLjk1MiA0MC41MjY5SDU1LjE0WiIgZmlsbD0iIzE0MTMxMCIvPgo8cGF0aCBkPSJNNzcuOTE5NiA0MC41MjY5SDEyNC42NzZMMTIyLjM5MyA1MS4yNDMxSDkzLjAwNTlMOTEuNzUzNCA1Ny4xNjA3SDExOS4wNDJMMTE2Ljc2IDY3Ljg4MjVIODkuNDY1NEw4OC4yMTI4IDczLjc5NDVIMTE3LjU5NUwxMTUuMzEyIDg0LjUxMDhINjguNTU2Mkw3Ny45MTk2IDQwLjUyNjlaIiBmaWxsPSIjMTQxMzEwIi8+CjxwYXRoIGQ9Ik0xMzQuMjIzIDQwLjUyNjlIMTUxLjU5N0wxNDQuNzUgNzIuNjg2N0gxNzEuNjc3TDE2OS4xNjEgODQuNTEwOEgxMjQuODZMMTM0LjIyMyA0MC41MjY5WiIgZmlsbD0iIzE0MTMxMCIvPgo8cGF0aCBkPSJNMjMyLjg0IDY3LjM4NzFDMjMwLjQ5NyA3My4xODIyIDIyNy41MyA3Ny44NTg0IDIyMi41NDIgODEuMDY0OUMyMTcuNjA5IDg0LjI2NTkgMjEwLjU3OCA4Ni4wNDczIDE5OS45NzkgODYuMDQ3M0MxODkuMzggODYuMDQ3MyAxNzAuMDc0IDg1LjMwNjkgMTc0LjkyOCA2Mi41MTYxQzE3OS43NzcgMzkuNzE5NyAxOTkuNDY3IDM4Ljk4NDkgMjEwIDM4Ljk4NDlDMjIwLjUzMiAzOC45ODQ5IDIzNi4zMiA0MC4zNDMyIDIzNC44OTUgNTcuNzczMUgyMTUuMzA1QzIxNS40NzcgNTQuNjMzNCAyMTQuMzUzIDUwLjA3NDEgMjA3LjYzOSA1MC4wNzQxQzIwMC41NTggNTAuMDc0MSAxOTUuMzE0IDUzLjU4MTIgMTkzLjQxIDYyLjUxNjFDMTkxLjUxMiA3MS40NTA5IDE5NS4xMzYgNzQuOTYzNiAyMDEuNDgyIDc0Ljk2MzZDMjA2Ljk2IDc0Ljk2MzYgMjEwLjcxMiA3Mi42ODEyIDIxMy4yNTYgNjcuMzg3MUgyMzIuODQ2SDIzMi44NFoiIGZpbGw9IiMxNDEzMTAiLz4KPHBhdGggZD0iTTI3OC40NDQgNjYuOTU4NEgyNTguOTE2TDI1NS4xOCA4NC41MTA4SDIzNy44MDZMMjQ3LjE2NCA0MC41MjY5SDI2NC41MzhMMjYxLjI3NiA1NS44NjkySDI4MC44MDVMMjg0LjA2NyA0MC41MjY5SDMwMS40NDFMMjkyLjA3OCA4NC41MTA4SDI3NC43MDlMMjc4LjQ0NCA2Ni45NTg0WiIgZmlsbD0iIzE0MTMxMCIvPgo8cGF0aCBkPSJNMTI0LjAwMiAyMy43MDM5QzE3NC45MjMgMTAuODExIDIyMy4zNiAyLjYyMjA3IDI1OC41NzEgMi42MjIwN0MyOTMuNzgxIDIuNjIyMDcgMzA5Ljc2OSAxMC41MzgyIDMwNS43MjggMjMuNzA5NEwxMjQuMDAyIDIzLjY5ODNWMjMuNzAzOVoiIGZpbGw9IiNENzA5MjYiLz4KPHBhdGggZD0iTTMwOS4yMjkgNC4zNTMzQzMwOS45NyA0LjM1MzMgMzExLjA1IDQuNDc1NzcgMzExLjA1IDMuNDIzNjNDMzExLjA1IDIuNjEwODcgMzEwLjM4NyAyLjUxMDY2IDMwOS43NDcgMi41MTA2NkgzMDguMjYxVjQuMzUzM0gzMDkuMjI5Wk0zMTEuNjc5IDcuMjU5MjFIMzEwLjkxNkwzMDkuNDMgNC44NTk4OUgzMDguMjYxVjcuMjU5MjFIMzA3LjYyVjIuMDU0MThIMzA5Ljg5MkMzMTEuMjY3IDIuMDU0MTggMzExLjczNCAyLjU3MTkgMzExLjczNCAzLjQzNDc3QzMxMS43MzQgNC40NTM1MSAzMTEuMDIyIDQuODMyMDUgMzEwLjEwMyA0Ljg1OTg5TDMxMS42NzkgNy4yNTkyMVpNMzEzLjI2NSA0LjY0ODM1QzMxMy4yNjUgMi4zODI2MyAzMTEuNjE3IDAuNjE3OTI0IDMwOS4zNTIgMC42MTc5MjRDMzA3LjA4NiAwLjYxNzkyNCAzMDUuNDE2IDIuMzg4MTkgMzA1LjQxNiA0LjY0ODM1QzMwNS40MTYgNi45MDg1IDMwNy4wNzUgOC43MDY2IDMwOS4zNTIgOC43MDY2QzMxMS42MjkgOC43MDY2IDMxMy4yNjUgNi45MzYzNCAzMTMuMjY1IDQuNjQ4MzVaTTMwNC42NzUgNC42NDgzNUMzMDQuNjc1IDIuMDg3NTggMzA2Ljc2OSAwIDMwOS4zNTIgMEMzMTEuOTM1IDAgMzE0IDIuMDg3NTggMzE0IDQuNjQ4MzVDMzE0IDcuMjA5MTEgMzExLjkxOCA5LjMyNDUzIDMwOS4zNTIgOS4zMjQ1M0MzMDYuNzg1IDkuMzI0NTMgMzA0LjY3NSA3LjIzMTM4IDMwNC42NzUgNC42NDgzNVoiIGZpbGw9IiMxNDEzMTAiLz4KPHBhdGggZD0iTTgwLjc4OTYgMTA0LjQ2N0g4Mi45MzI4TDg4LjcyMjQgMTE3LjcyMkg4Ni4yNzg1TDg0Ljk0MjUgMTE0LjU0M0g3OC43MTg3TDc3LjM2NTkgMTE3LjcyMkg3NUw4MC43ODk2IDEwNC40NjdaTTg0LjA5NjMgMTEyLjQ5NUw4MS44MTk0IDEwNy4yMjhMNzkuNTY0OCAxMTIuNDk1SDg0LjA5NjNaIiBmaWxsPSIjNzE3MDczIi8+CjxwYXRoIGQ9Ik04OS43NzQ2IDEwNy43OTZIOTIuMDUxNVYxMDkuMzIyQzkyLjY5MTcgMTA4LjM5OCA5My42MTAyIDEwNy41OSA5NS4xNTIyIDEwNy41OUM5Ny4zOTAxIDEwNy41OSA5OC42ODcyIDEwOS4wOTMgOTguNjg3MiAxMTEuMzg3VjExNy43MjJIOTYuNDEwM1YxMTIuMDgzQzk2LjQxMDMgMTEwLjU0MSA5NS42NDIxIDEwOS42NTYgOTQuMjgzOCAxMDkuNjU2QzkyLjkyNTUgMTA5LjY1NiA5Mi4wNDU5IDExMC41NzQgOTIuMDQ1OSAxMTIuMTE2VjExNy43MTZIODkuNzY5VjEwNy43OTFMODkuNzc0NiAxMDcuNzk2WiIgZmlsbD0iIzcxNzA3MyIvPgo8cGF0aCBkPSJNMTA1LjU4NCAxMDQuNTYySDEwNy44OTVWMTE3LjcyMkgxMDUuNTg0VjEwNC41NjJaIiBmaWxsPSIjNzE3MDczIi8+CjxwYXRoIGQ9Ik0xMTAuMjExIDEwNy43OTZIMTEyLjQ4N1YxMDkuMzIyQzExMy4xMjggMTA4LjM5OCAxMTQuMDQ2IDEwNy41OSAxMTUuNTg4IDEwNy41OUMxMTcuODI2IDEwNy41OSAxMTkuMTIzIDEwOS4wOTMgMTE5LjEyMyAxMTEuMzg3VjExNy43MjJIMTE2Ljg0NlYxMTIuMDgzQzExNi44NDYgMTEwLjU0MSAxMTYuMDc4IDEwOS42NTYgMTE0LjcyIDEwOS42NTZDMTEzLjM2MiAxMDkuNjU2IDExMi40ODIgMTEwLjU3NCAxMTIuNDgyIDExMi4xMTZWMTE3LjcxNkgxMTAuMjA1VjEwNy43OTFMMTEwLjIxMSAxMDcuNzk2WiIgZmlsbD0iIzcxNzA3MyIvPgo8cGF0aCBkPSJNMTIwLjkwNCAxMTkuNTgxTDEyMS43NTEgMTE3Ljg3MkMxMjIuODE5IDExOC41MjkgMTIzLjkzMyAxMTguOTI1IDEyNS4yODYgMTE4LjkyNUMxMjcuMzE4IDExOC45MjUgMTI4LjQyNSAxMTcuODcyIDEyOC40MjUgMTE1Ljg3OVYxMTUuMTExQzEyNy41OTYgMTE2LjE4IDEyNi41NjYgMTE2LjkzNyAxMjQuOTI5IDExNi45MzdDMTIyLjU5NyAxMTYuOTM3IDEyMC40MiAxMTUuMjA2IDEyMC40MiAxMTIuMjk0VjExMi4yNTVDMTIwLjQyIDEwOS4zMjIgMTIyLjYxOSAxMDcuNTkgMTI0LjkyOSAxMDcuNTlDMTI2LjYwNSAxMDcuNTkgMTI3LjYzNSAxMDguMzU5IDEyOC40MDkgMTA5LjI4M1YxMDcuNzk2SDEzMC42ODVWMTE1LjY5QzEzMC42ODUgMTE3LjM2IDEzMC4yNTEgMTE4LjYwMiAxMjkuNDI3IDExOS40MzFDMTI4LjUyNiAxMjAuMzMzIDEyNy4xMzQgMTIwLjc2NyAxMjUuMzQ3IDEyMC43NjdDMTIzLjcxIDEyMC43NjcgMTIyLjE5IDEyMC4zNTUgMTIwLjkxIDExOS41ODFIMTIwLjkwNFpNMTI4LjQ0MiAxMTIuMjY3VjExMi4yMjhDMTI4LjQ0MiAxMTAuNjEzIDEyNy4xMDYgMTA5LjUgMTI1LjUzMSAxMDkuNUMxMjMuOTU1IDEwOS41IDEyMi43MTQgMTEwLjU5MSAxMjIuNzE0IDExMi4yMjhWMTEyLjI2N0MxMjIuNzE0IDExMy44ODEgMTIzLjk3MiAxMTQuOTk0IDEyNS41MzEgMTE0Ljk5NEMxMjcuMDg5IDExNC45OTQgMTI4LjQ0MiAxMTMuODg2IDEyOC40NDIgMTEyLjI2N1oiIGZpbGw9IiM3MTcwNzMiLz4KPHBhdGggZD0iTTEzMi4wNTUgMTEyLjc5NlYxMTIuNzU3QzEzMi4wNTUgMTA5LjkxNyAxMzQuMDY1IDEwNy41ODUgMTM2LjkwNCAxMDcuNTg1QzE0MC4wNiAxMDcuNTg1IDE0MS42NTggMTEwLjA2OCAxNDEuNjU4IDExMi45MjRDMTQxLjY1OCAxMTMuMTMgMTQxLjY0MSAxMTMuMzM2IDE0MS42MTkgMTEzLjU2NEgxMzQuMzI2QzEzNC41NzEgMTE1LjE3OCAxMzUuNzE4IDExNi4wODYgMTM3LjE4MiAxMTYuMDg2QzEzOC4yOSAxMTYuMDg2IDEzOS4wODEgMTE1LjY3NCAxMzkuODcxIDExNC45TDE0MS4yMDcgMTE2LjA4NkMxNDAuMjY2IDExNy4yMTYgMTM4Ljk2OSAxMTcuOTQ1IDEzNy4xNDkgMTE3Ljk0NUMxMzQuMjcxIDExNy45NDUgMTMyLjA1NSAxMTUuODU3IDEzMi4wNTUgMTEyLjc5NlpNMTM5LjQwMyAxMTIuMDYxQzEzOS4yNTMgMTEwLjU5NyAxMzguMzkgMTA5LjQ1IDEzNi44ODcgMTA5LjQ1QzEzNS40OTYgMTA5LjQ1IDEzNC41MjEgMTEwLjUxOSAxMzQuMzEgMTEyLjA2MUgxMzkuNDAzWiIgZmlsbD0iIzcxNzA3MyIvPgo8cGF0aCBkPSJNMTQzLjAxNiAxMDcuNzk2SDE0NS4yOTNWMTEwLjAzNEMxNDUuOTExIDEwOC41NDggMTQ3LjA1OCAxMDcuNTM1IDE0OC44MDYgMTA3LjYwN1YxMTAuMDEySDE0OC42NzJDMTQ2LjY3OSAxMTAuMDEyIDE0NS4yODggMTExLjMwOSAxNDUuMjg4IDExMy45NDJWMTE3LjcyMkgxNDMuMDExVjEwNy43OTZIMTQzLjAxNloiIGZpbGw9IiM3MTcwNzMiLz4KPHBhdGggZD0iTTE0OS4wMjkgMTE2LjQyNUwxNTAuMDQyIDExNC44ODNDMTUxLjEzMyAxMTUuNjkgMTUyLjI4IDExNi4xMDIgMTUzLjI5MyAxMTYuMTAyQzE1NC4zMDYgMTE2LjEwMiAxNTQuODM1IDExNS42OSAxNTQuODM1IDExNS4wMzRWMTE0Ljk5NUMxNTQuODM1IDExNC4yMjYgMTUzLjc4MyAxMTMuOTU5IDE1Mi42MTkgMTEzLjYwM0MxNTEuMTU1IDExMy4xOTEgMTQ5LjUxOCAxMTIuNTkgMTQ5LjUxOCAxMTAuNjkxVjExMC42NTJDMTQ5LjUxOCAxMDguNzcxIDE1MS4wNzcgMTA3LjYyNCAxNTMuMDUzIDEwNy42MjRDMTU0LjI5NSAxMDcuNjI0IDE1NS42NDggMTA4LjA1OCAxNTYuNyAxMDguNzU0TDE1NS43OTggMTEwLjM2OEMxNTQuODQgMTA5Ljc4NCAxNTMuODI3IDEwOS40MjggMTUyLjk5OCAxMDkuNDI4QzE1Mi4xMTMgMTA5LjQyOCAxNTEuNjA2IDEwOS44NCAxNTEuNjA2IDExMC40MDdWMTEwLjQ0NkMxNTEuNjA2IDExMS4xODEgMTUyLjY3NSAxMTEuNDgyIDE1My44NDQgMTExLjg1NUMxNTUuMjkxIDExMi4zMDYgMTU2LjkyOCAxMTIuOTYzIDE1Ni45MjggMTE0Ljc1VjExNC43ODlDMTU2LjkyOCAxMTYuODc2IDE1NS4zMTQgMTE3LjkxMiAxNTMuMjQzIDExNy45MTJDMTUxLjgzNCAxMTcuOTEyIDE1MC4yNyAxMTcuNDA1IDE0OS4wMzQgMTE2LjQyNUgxNDkuMDI5WiIgZmlsbD0iIzcxNzA3MyIvPgo8cGF0aCBkPSJNMTU3Ljc3NCAxMTIuODEyVjExMi43NzNDMTU3Ljc3NCAxMDkuOTM0IDE2MC4wMjkgMTA3LjU4NSAxNjMuMDc0IDEwNy41ODVDMTY2LjExOSAxMDcuNTg1IDE2OC4zNTcgMTA5Ljg5NSAxNjguMzU3IDExMi43MzRWMTEyLjc3M0MxNjguMzU3IDExNS41OTYgMTY2LjEwMiAxMTcuOTQ1IDE2My4wMzUgMTE3Ljk0NUMxNTkuOTY3IDExNy45NDUgMTU3Ljc2OSAxMTUuNjM1IDE1Ny43NjkgMTEyLjgxMkgxNTcuNzc0Wk0xNjYuMDg1IDExMi44MTJWMTEyLjc3M0MxNjYuMDg1IDExMS4wMjUgMTY0LjgyNyAxMDkuNTc4IDE2My4wNCAxMDkuNTc4QzE2MS4yNTMgMTA5LjU3OCAxNjAuMDUxIDExMS4wMDkgMTYwLjA1MSAxMTIuNzM0VjExMi43NzNDMTYwLjA1MSAxMTQuNTA1IDE2MS4zMDkgMTE1Ljk1MiAxNjMuMDc5IDExNS45NTJDMTY0Ljg1IDExNS45NTIgMTY2LjA4NSAxMTQuNTIxIDE2Ni4wODUgMTEyLjgxMloiIGZpbGw9IiM3MTcwNzMiLz4KPHBhdGggZD0iTTE2OS44NiAxMDRIMTcyLjEzN1YxMTcuNzIySDE2OS44NlYxMDRaIiBmaWxsPSIjNzE3MDczIi8+CjxwYXRoIGQ9Ik0xNzQuMjk3IDEwNEgxNzYuNTczVjExNy43MjJIMTc0LjI5N1YxMDRaIiBmaWxsPSIjNzE3MDczIi8+CjxwYXRoIGQ9Ik0xODMuNTY1IDEwNC41NjJIMTg5LjQzM0MxOTEuMDg2IDEwNC41NjIgMTkyLjM4MyAxMDUuMDUyIDE5My4yMyAxMDUuODc2QzE5My45MjUgMTA2LjU4OCAxOTQuMzIxIDEwNy41NjggMTk0LjMyMSAxMDguNzE1VjEwOC43NTRDMTk0LjMyMSAxMTAuOTE0IDE5My4wMjQgMTEyLjIxMSAxOTEuMTk4IDExMi43NEwxOTQuNzQ5IDExNy43MjJIMTkyLjAwNUwxODguNzcgMTEzLjEzNUgxODUuODc2VjExNy43MjJIMTgzLjU2NVYxMDQuNTYyWk0xODkuMjYgMTExLjA4NkMxOTAuOTE0IDExMS4wODYgMTkxLjk2NiAxMTAuMjI0IDE5MS45NjYgMTA4Ljg4N1YxMDguODQ5QzE5MS45NjYgMTA3LjQ0IDE5MC45NTMgMTA2LjY2NiAxODkuMjM4IDEwNi42NjZIMTg1Ljg3NlYxMTEuMDg2SDE4OS4yNloiIGZpbGw9IiM3MTcwNzMiLz4KPHBhdGggZD0iTTE5NS4yOTUgMTE0Ljg2NlYxMTQuODI3QzE5NS4yOTUgMTEyLjY4NCAxOTYuOTY1IDExMS42MzIgMTk5LjM5MiAxMTEuNjMyQzIwMC41IDExMS42MzIgMjAxLjI5IDExMS43OTkgMjAyLjA1OSAxMTIuMDQ0VjExMS43OTlDMjAyLjA1OSAxMTAuMzkgMjAxLjE5NiAxMDkuNjM5IDE5OS41OTggMTA5LjYzOUMxOTguNDkgMTA5LjYzOSAxOTcuNjYxIDEwOS44ODQgMTk2Ljc1OSAxMTAuMjU3TDE5Ni4xNTggMTA4LjQ3QzE5Ny4yNDkgMTA3Ljk4IDE5OC4zMTggMTA3LjY2MyAxOTkuODk5IDEwNy42NjNDMjAxLjM4NSAxMDcuNjYzIDIwMi40OTMgMTA4LjA1OCAyMDMuMTg5IDEwOC43N0MyMDMuOTI0IDEwOS40ODMgMjA0LjI1OCAxMTAuNTM1IDIwNC4yNTggMTExLjgzMlYxMTcuNzE2SDIwMi4wNDJWMTE2LjQ3NUMyMDEuMzYzIDExNy4yODIgMjAwLjMzMyAxMTcuOTIyIDE5OC44MDggMTE3LjkyMkMxOTYuOTQ4IDExNy45MjIgMTk1LjI5NSAxMTYuODU0IDE5NS4yOTUgMTE0Ljg2MVYxMTQuODY2Wk0yMDIuMDk4IDExNC4xNTRWMTEzLjQ3NEMyMDEuNTEzIDExMy4yNDYgMjAwLjc0NSAxMTMuMDc5IDE5OS44NDMgMTEzLjA3OUMxOTguMzc5IDExMy4wNzkgMTk3LjUxMSAxMTMuNjk3IDE5Ny41MTEgMTE0LjczM1YxMTQuNzcyQzE5Ny41MTEgMTE1LjcyOSAxOTguMzU3IDExNi4yNzUgMTk5LjQ0OCAxMTYuMjc1QzIwMC45NTEgMTE2LjI3NSAyMDIuMDk4IDExNS40MTIgMjAyLjA5OCAxMTQuMTQ4VjExNC4xNTRaIiBmaWxsPSIjNzE3MDczIi8+CjxwYXRoIGQ9Ik0yMDYuMDUgMTA3Ljc5NkgyMDguMzI3VjEwOS4zMjJDMjA4Ljk2NyAxMDguMzk4IDIwOS44ODYgMTA3LjU5IDIxMS40MjggMTA3LjU5QzIxMy42NjYgMTA3LjU5IDIxNC45NjMgMTA5LjA5MyAyMTQuOTYzIDExMS4zODdWMTE3LjcyMkgyMTIuNjg2VjExMi4wODNDMjEyLjY4NiAxMTAuNTQxIDIxMS45MTggMTA5LjY1NiAyMTAuNTU5IDEwOS42NTZDMjA5LjIwMSAxMDkuNjU2IDIwOC4zMjEgMTEwLjU3NCAyMDguMzIxIDExMi4xMTZWMTE3LjcxNkgyMDYuMDQ0VjEwNy43OTFMMjA2LjA1IDEwNy43OTZaIiBmaWxsPSIjNzE3MDczIi8+CjxwYXRoIGQ9Ik0yMTYuMjU0IDExMi43NzlWMTEyLjc0QzIxNi4yNTQgMTA5LjQ1IDIxOC40OTIgMTA3LjU5MSAyMjAuODU4IDEwNy41OTFDMjIyLjQ5NSAxMDcuNTkxIDIyMy41MjUgMTA4LjM5OCAyMjQuMjQzIDEwOS4zMzlWMTA0SDIyNi41MTlWMTE3LjcyMkgyMjQuMjQzVjExNi4wNjlDMjIzLjUwOCAxMTcuMTA0IDIyMi40NzggMTE3LjkyOCAyMjAuODU4IDExNy45MjhDMjE4LjUyNSAxMTcuOTI4IDIxNi4yNTQgMTE2LjA2OSAyMTYuMjU0IDExMi43NzlaTTIyNC4yODIgMTEyLjc3OVYxMTIuNzRDMjI0LjI4MiAxMTAuODI1IDIyMi45MjkgMTA5LjU2MSAyMjEuNDA0IDEwOS41NjFDMjE5Ljg3OCAxMDkuNTYxIDIxOC41NDggMTEwLjc2NCAyMTguNTQ4IDExMi43NFYxMTIuNzc5QzIxOC41NDggMTE0LjY5NCAyMTkuODYxIDExNS45NTggMjIxLjQwNCAxMTUuOTU4QzIyMi45NDYgMTE1Ljk1OCAyMjQuMjgyIDExNC42NzcgMjI0LjI4MiAxMTIuNzc5WiIgZmlsbD0iIzcxNzA3MyIvPgo8cGF0aCBkPSJNMjMzLjQgMTA0LjU2MkgyMzkuMzAxQzI0MC44MDQgMTA0LjU2MiAyNDEuOTkgMTA0Ljk3NCAyNDIuNzQxIDEwNS43MjVDMjQzLjMyNiAxMDYuMzEgMjQzLjYyNiAxMDcuMDIzIDI0My42MjYgMTA3LjkwOFYxMDcuOTQ3QzI0My42MjYgMTA5LjUyOCAyNDIuNzI1IDExMC4zNzQgMjQxLjc0NSAxMTAuODhDMjQzLjI4NyAxMTEuNDA5IDI0NC4zNTYgMTEyLjI4OSAyNDQuMzU2IDExNC4wNzZWMTE0LjExNUMyNDQuMzU2IDExNi40NjQgMjQyLjQxOCAxMTcuNzIyIDIzOS40ODUgMTE3LjcyMkgyMzMuMzk1VjEwNC41NjJIMjMzLjRaTTI0MS4zMTYgMTA4LjI4NkMyNDEuMzE2IDEwNy4yNTEgMjQwLjQ4NyAxMDYuNjExIDIzOS4wMDYgMTA2LjYxMUgyMzUuNjc3VjExMC4xMDdIMjM4LjgzM0MyNDAuMzIgMTEwLjEwNyAyNDEuMzE2IDEwOS41MjIgMjQxLjMxNiAxMDguMzJWMTA4LjI4MVYxMDguMjg2Wk0yMzkuMzQ2IDExMi4wNjZIMjM1LjY4M1YxMTUuNjc0SDIzOS41MThDMjQxLjA5OSAxMTUuNjc0IDI0Mi4wNTcgMTE1LjA1NiAyNDIuMDU3IDExMy44N1YxMTMuODMxQzI0Mi4wNTcgMTEyLjcyMyAyNDEuMTcxIDExMi4wNjYgMjM5LjM1MSAxMTIuMDY2SDIzOS4zNDZaIiBmaWxsPSIjNzE3MDczIi8+CjxwYXRoIGQ9Ik0yNDUuNjU4IDExNC4xMDlWMTA3Ljc5MUgyNDcuOTM1VjExMy40M0MyNDcuOTM1IDExNC45NzIgMjQ4LjcwNCAxMTUuODM1IDI1MC4wNjIgMTE1LjgzNUMyNTEuNDIgMTE1LjgzNSAyNTIuMyAxMTQuOTMzIDI1Mi4zIDExMy4zOTFWMTA3Ljc5MUgyNTQuNTkzVjExNy43MTdIMjUyLjNWMTE2LjE3NUMyNTEuNjYgMTE3LjExNiAyNTAuNzQxIDExNy45MjMgMjQ5LjE5OSAxMTcuOTIzQzI0Ni45NjEgMTE3LjkyMyAyNDUuNjY0IDExNi40MiAyNDUuNjY0IDExNC4xMDlIMjQ1LjY1OFoiIGZpbGw9IiM3MTcwNzMiLz4KPHBhdGggZD0iTTI1NS42NzkgMTE2LjQyNUwyNTYuNjkyIDExNC44ODNDMjU3Ljc4MyAxMTUuNjkgMjU4LjkzIDExNi4xMDIgMjU5Ljk0MyAxMTYuMTAyQzI2MC45NTYgMTE2LjEwMiAyNjEuNDg1IDExNS42OSAyNjEuNDg1IDExNS4wMzRWMTE0Ljk5NUMyNjEuNDg1IDExNC4yMjYgMjYwLjQzMyAxMTMuOTU5IDI1OS4yNjQgMTEzLjYwM0MyNTcuOCAxMTMuMTkxIDI1Ni4xNjMgMTEyLjU5IDI1Ni4xNjMgMTEwLjY5MVYxMTAuNjUyQzI1Ni4xNjMgMTA4Ljc3MSAyNTcuNzIyIDEwNy42MjQgMjU5LjY5OCAxMDcuNjI0QzI2MC45NCAxMDcuNjI0IDI2Mi4yOTIgMTA4LjA1OCAyNjMuMzQ1IDEwOC43NTRMMjYyLjQ0MyAxMTAuMzY4QzI2MS40ODUgMTA5Ljc4NCAyNjAuNDcyIDEwOS40MjggMjU5LjY0MyAxMDkuNDI4QzI1OC43NTcgMTA5LjQyOCAyNTguMjUxIDEwOS44NCAyNTguMjUxIDExMC40MDdWMTEwLjQ0NkMyNTguMjUxIDExMS4xODEgMjU5LjMyIDExMS40ODIgMjYwLjQ4OSAxMTEuODU1QzI2MS45MzYgMTEyLjMwNiAyNjMuNTczIDExMi45NjMgMjYzLjU3MyAxMTQuNzVWMTE0Ljc4OUMyNjMuNTczIDExNi44NzYgMjYxLjk1OCAxMTcuOTEyIDI1OS44ODggMTE3LjkxMkMyNTguNDc5IDExNy45MTIgMjU2LjkxNSAxMTcuNDA1IDI1NS42NzkgMTE2LjQyNVoiIGZpbGw9IiM3MTcwNzMiLz4KPHBhdGggZD0iTTI2NS4wMDMgMTA0LjExMUgyNjcuNDQ3VjEwNi4yNzFIMjY1LjAwM1YxMDQuMTExWk0yNjUuMDk4IDEwNy43OTdIMjY3LjM3NVYxMTcuNzIySDI2NS4wOThWMTA3Ljc5N1oiIGZpbGw9IiM3MTcwNzMiLz4KPHBhdGggZD0iTTI2OS40MDEgMTA3Ljc5NkgyNzEuNjc4VjEwOS4zMjJDMjcyLjMxOCAxMDguMzk4IDI3My4yMzcgMTA3LjU5IDI3NC43NzkgMTA3LjU5QzI3Ny4wMTcgMTA3LjU5IDI3OC4zMTQgMTA5LjA5MyAyNzguMzE0IDExMS4zODdWMTE3LjcyMkgyNzYuMDM3VjExMi4wODNDMjc2LjAzNyAxMTAuNTQxIDI3NS4yNjkgMTA5LjY1NiAyNzMuOTEgMTA5LjY1NkMyNzIuNTUyIDEwOS42NTYgMjcxLjY3MyAxMTAuNTc0IDI3MS42NzMgMTEyLjExNlYxMTcuNzE2SDI2OS4zOTZWMTA3Ljc5MUwyNjkuNDAxIDEwNy43OTZaIiBmaWxsPSIjNzE3MDczIi8+CjxwYXRoIGQ9Ik0yNzkuNTcyIDExMi43OTZWMTEyLjc1N0MyNzkuNTcyIDEwOS45MTcgMjgxLjU4MiAxMDcuNTg1IDI4NC40MjEgMTA3LjU4NUMyODcuNTc3IDEwNy41ODUgMjg5LjE3NSAxMTAuMDY4IDI4OS4xNzUgMTEyLjkyNEMyODkuMTc1IDExMy4xMyAyODkuMTU4IDExMy4zMzYgMjg5LjEzNiAxMTMuNTY0SDI4MS44NDNDMjgyLjA4OCAxMTUuMTc4IDI4My4yMzUgMTE2LjA4NiAyODQuNjk5IDExNi4wODZDMjg1LjgwNyAxMTYuMDg2IDI4Ni41OTcgMTE1LjY3NCAyODcuMzg4IDExNC45TDI4OC43MjQgMTE2LjA4NkMyODcuNzgzIDExNy4yMTYgMjg2LjQ4NiAxMTcuOTQ1IDI4NC42NjYgMTE3Ljk0NUMyODEuNzg4IDExNy45NDUgMjc5LjU3MiAxMTUuODU3IDI3OS41NzIgMTEyLjc5NlpNMjg2LjkyIDExMi4wNjFDMjg2Ljc3IDExMC41OTcgMjg1LjkwNyAxMDkuNDUgMjg0LjQwNCAxMDkuNDVDMjgzLjAxMiAxMDkuNDUgMjgyLjAzOCAxMTAuNTE5IDI4MS44MjcgMTEyLjA2MUgyODYuOTJaIiBmaWxsPSIjNzE3MDczIi8+CjxwYXRoIGQ9Ik0yODkuNzI2IDExNi40MjVMMjkwLjczOSAxMTQuODgzQzI5MS44MyAxMTUuNjkgMjkyLjk3NyAxMTYuMTAyIDI5My45OSAxMTYuMTAyQzI5NS4wMDMgMTE2LjEwMiAyOTUuNTMyIDExNS42OSAyOTUuNTMyIDExNS4wMzRWMTE0Ljk5NUMyOTUuNTMyIDExNC4yMjYgMjk0LjQ4IDExMy45NTkgMjkzLjMxNiAxMTMuNjAzQzI5MS44NTIgMTEzLjE5MSAyOTAuMjE2IDExMi41OSAyOTAuMjE2IDExMC42OTFWMTEwLjY1MkMyOTAuMjE2IDEwOC43NzEgMjkxLjc3NCAxMDcuNjI0IDI5My43NTEgMTA3LjYyNEMyOTQuOTkyIDEwNy42MjQgMjk2LjM0NSAxMDguMDU4IDI5Ny4zOTcgMTA4Ljc1NEwyOTYuNDk1IDExMC4zNjhDMjk1LjUzOCAxMDkuNzg0IDI5NC41MTkgMTA5LjQyOCAyOTMuNjk1IDEwOS40MjhDMjkyLjgxIDEwOS40MjggMjkyLjMwMyAxMDkuODQgMjkyLjMwMyAxMTAuNDA3VjExMC40NDZDMjkyLjMwMyAxMTEuMTgxIDI5My4zNzIgMTExLjQ4MiAyOTQuNTQxIDExMS44NTVDMjk1Ljk4OSAxMTIuMzA2IDI5Ny42MjUgMTEyLjk2MyAyOTcuNjI1IDExNC43NVYxMTQuNzg5QzI5Ny42MjUgMTE2Ljg3NiAyOTYuMDExIDExNy45MTIgMjkzLjk0IDExNy45MTJDMjkyLjUzMiAxMTcuOTEyIDI5MC45NjcgMTE3LjQwNSAyODkuNzMxIDExNi40MjVIMjg5LjcyNloiIGZpbGw9IiM3MTcwNzMiLz4KPHBhdGggZD0iTTI5OC4wMTUgMTE2LjQyNUwyOTkuMDI4IDExNC44ODNDMzAwLjExOSAxMTUuNjkgMzAxLjI2NiAxMTYuMTAyIDMwMi4yNzkgMTE2LjEwMkMzMDMuMjkyIDExNi4xMDIgMzAzLjgyMSAxMTUuNjkgMzAzLjgyMSAxMTUuMDM0VjExNC45OTVDMzAzLjgyMSAxMTQuMjI2IDMwMi43NjkgMTEzLjk1OSAzMDEuNjA2IDExMy42MDNDMzAwLjE0MSAxMTMuMTkxIDI5OC41MDUgMTEyLjU5IDI5OC41MDUgMTEwLjY5MVYxMTAuNjUyQzI5OC41MDUgMTA4Ljc3MSAzMDAuMDY0IDEwNy42MjQgMzAyLjA0IDEwNy42MjRDMzAzLjI4MSAxMDcuNjI0IDMwNC42MzQgMTA4LjA1OCAzMDUuNjg2IDEwOC43NTRMMzA0Ljc4NCAxMTAuMzY4QzMwMy44MjcgMTA5Ljc4NCAzMDIuODA4IDEwOS40MjggMzAxLjk4NCAxMDkuNDI4QzMwMS4wOTkgMTA5LjQyOCAzMDAuNTkyIDEwOS44NCAzMDAuNTkyIDExMC40MDdWMTEwLjQ0NkMzMDAuNTkyIDExMS4xODEgMzAxLjY2MSAxMTEuNDgyIDMwMi44MyAxMTEuODU1QzMwNC4yNzggMTEyLjMwNiAzMDUuOTE0IDExMi45NjMgMzA1LjkxNCAxMTQuNzVWMTE0Ljc4OUMzMDUuOTE0IDExNi44NzYgMzA0LjMgMTE3LjkxMiAzMDIuMjI5IDExNy45MTJDMzAwLjgyMSAxMTcuOTEyIDI5OS4yNTYgMTE3LjQwNSAyOTguMDIgMTE2LjQyNUgyOTguMDE1WiIgZmlsbD0iIzcxNzA3MyIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzEzNTMwXzIyNjEwOCI+CjxyZWN0IHdpZHRoPSIzMTQiIGhlaWdodD0iMTIxLjY2NCIgZmlsbD0id2hpdGUiLz4KPC9jbGlwUGF0aD4KPC9kZWZzPgo8L3N2Zz4K" alt="Welch logo">
+  <h1 class="anim" style="--d:.25s">Welch ads: Monday&#39;s changes, the old campaigns against ours, and our plan</h1>
+  <p class="anim sub" style="--d:.45s">Welch · Digital Will Ads · October 7, 2026</p>
+</section>
+<section>
+  <p class="kicker anim">Monday and Tuesday · 1</p>
+  <h2 class="anim" style="--d:.1s">Google forms held at 13 on Monday and Tuesday, the same as a week earlier</h2>
+  <p class="lead anim" style="--d:0.20s">Spend was $2,776, against $2,967, so a form cost $206 instead of $224. Forms are GA4&#39;s count by click date, and late forms from these clicks still come in.</p>
+  <div class="stats anim" style="--d:0.30s"><div><em>13</em><span>Forms, Sep 28 to Sep 29</span></div><div class="arrow">→</div><div><em>13</em><span>Forms, Oct 5 to Oct 6</span></div></div>
+  <div class="anim" style="--d:0.40s"><svg viewBox="0 0 1080 254" class="chart big" role="img"><line class="grid" x1="0" x2="1080.0" y1="165.3" y2="165.3"/><line class="grid" x1="0" x2="1080.0" y1="100.6" y2="100.6"/><line class="grid" x1="0" x2="1080.0" y1="35.9" y2="35.9"/><line class="grid" x1="0" x2="1080.0" y1="20.0" y2="20.0"/><rect class="bar t-plain" style="--i:0" x="18.0" y="20.0" width="324.0" height="210.0"/><rect class="bar t-plain" style="--i:1" x="378.0" y="58.7" width="324.0" height="171.3"/><rect class="bar t-brand" style="--i:2" x="738.0" y="55.6" width="324.0" height="174.4"/><text class="axis halo" x="0" y="161.3">5</text><text class="axis halo" x="0" y="96.6">10</text><text class="axis halo" x="0" y="31.9">15</text><text class="axis halo" x="0" y="16.0">20</text><text class="axis" x="4.0" y="250.0">Sep 21 to 22</text><text class="axis" x="364.0" y="250.0">Sep 28 to 29</text><text class="axis" x="724.0" y="250.0">Oct 5 to 6</text><rect class="hit" x="0.0" y="0" width="360.0" height="230.0" data-tip="Sep 21 to 22 · 16 forms · $4,776 spend"/><rect class="hit" x="360.0" y="0" width="360.0" height="230.0" data-tip="Sep 28 to 29 · 13 forms · $2,967 spend"/><rect class="hit" x="720.0" y="0" width="360.0" height="230.0" data-tip="Oct 5 to 6 · 13 forms · $2,776 spend"/><line class="hovline" y1="0" y2="230.0"/><circle class="hov t-bad" r="7"/></svg><svg viewBox="0 0 360 224" class="chart phone" role="img"><line class="grid" x1="0" x2="360.0" y1="144.5" y2="144.5"/><line class="grid" x1="0" x2="360.0" y1="89.1" y2="89.1"/><line class="grid" x1="0" x2="360.0" y1="33.6" y2="33.6"/><line class="grid" x1="0" x2="360.0" y1="20.0" y2="20.0"/><rect class="bar t-plain" style="--i:0" x="6.0" y="20.0" width="108.0" height="180.0"/><rect class="bar t-plain" style="--i:1" x="126.0" y="53.2" width="108.0" height="146.8"/><rect class="bar t-brand" style="--i:2" x="246.0" y="50.5" width="108.0" height="149.5"/><text class="axis halo" x="0" y="140.5">5</text><text class="axis halo" x="0" y="85.1">10</text><text class="axis halo" x="0" y="29.6">15</text><text class="axis halo" x="0" y="16.0">20</text><text class="axis" x="4.0" y="220.0">Sep 21 to 22</text><text class="axis" x="124.0" y="220.0">Sep 28 to 29</text><text class="axis" x="244.0" y="220.0">Oct 5 to 6</text><rect class="hit" x="0.0" y="0" width="120.0" height="200.0" data-tip="Sep 21 to 22 · 16 forms · $4,776 spend"/><rect class="hit" x="120.0" y="0" width="120.0" height="200.0" data-tip="Sep 28 to 29 · 13 forms · $2,967 spend"/><rect class="hit" x="240.0" y="0" width="120.0" height="200.0" data-tip="Oct 5 to 6 · 13 forms · $2,776 spend"/><line class="hovline" y1="0" y2="200.0"/><circle class="hov t-bad" r="5"/></svg><p class="cap">GA4 forms from Google ads, each Monday and Tuesday from Sep 21 to Oct 6, by click date</p></div>
+</section>
+<section>
+  <p class="kicker anim">Clicks · 2</p>
+  <h2 class="anim" style="--d:.1s">Clicks went up 16% on 6% less spend</h2>
+  <p class="lead anim" style="--d:0.20s">Google had 473 clicks this Monday and Tuesday, against 407 a week earlier. A click cost $5.87, down from $7.29. More clicks have not turned into more forms yet.</p>
+  <div class="stats anim" style="--d:0.30s"><div><em>$7.29</em><span>Per click, Sep 28 to Sep 29</span></div><div class="arrow">→</div><div class="good"><em>$5.87</em><span>Per click, Oct 5 to Oct 6</span></div></div>
+</section>
+<section>
+  <p class="kicker anim">Bing · 3</p>
+  <h2 class="anim" style="--d:.1s">Bing brought 6 conversions on Monday and Tuesday, against 5 a week earlier</h2>
+  <p class="lead anim" style="--d:0.20s">Bing spent $663, against $835. Bing&#39;s count includes shop orders, by click date.</p>
+  <div class="stats anim" style="--d:0.30s"><div><em>5</em><span>Conversions, Sep 28 to Sep 29</span></div><div class="arrow">→</div><div><em>6</em><span>Conversions, Oct 5 to Oct 6</span></div></div>
+</section>
+<section>
+  <p class="kicker anim">October so far · 4</p>
+  <h2 class="anim" style="--d:.1s">Google is on pace for about $43,100 in October, under the $45,000 cap</h2>
+  <p class="lead anim" style="--d:0.20s">It spent $7,565 from Oct 1 to Oct 6, at budgets of $1,422 a day. Bing is on pace for about $7,600, over its $6,000.</p>
+  <div class="stats anim" style="--d:0.30s"><div><em>$45,000</em><span>Google cap, per month</span></div><div class="good"><em>$43,100</em><span>Google October pace</span></div><div class="bad"><em>$7,600</em><span>Bing October pace</span></div></div>
+</section>
+<section>
+  <p class="kicker anim">Old against ours · 5</p>
+  <h2 class="anim" style="--d:.1s">The old campaigns brought 185 forms a month at $187. Ours bring 145 at $320</h2>
+  <p class="lead anim" style="--d:0.20s">Old campaigns: Mar to May. Ours: Aug 9 to Oct 6. Both per month.</p>
+  <div class="anim" style="--d:0.30s"><svg viewBox="0 0 1080 244" class="chart big" role="img"><line class="grid" x1="0" x2="1080.0" y1="148.6" y2="148.6"/><line class="grid" x1="0" x2="1080.0" y1="77.1" y2="77.1"/><rect class="bar t-plain" style="--i:0" x="18.0" y="37.4" width="144.0" height="182.6"/><rect class="bar t-brand" style="--i:1" x="198.0" y="67.3" width="144.0" height="152.7"/><rect class="bar t-plain" style="--i:2" x="378.0" y="161.4" width="144.0" height="58.6"/><rect class="bar t-brand" style="--i:3" x="558.0" y="173.6" width="144.0" height="46.4"/><rect class="bar t-plain" style="--i:4" x="738.0" y="196.4" width="144.0" height="23.6"/><rect class="bar t-brand" style="--i:5" x="918.0" y="212.6" width="144.0" height="7.4"/><text class="val" x="90.0" y="29.4" text-anchor="middle">$156</text><text class="val" x="270.0" y="59.3" text-anchor="middle">$292</text><text class="val" x="450.0" y="153.4" text-anchor="middle">$311</text><text class="val" x="630.0" y="165.6" text-anchor="middle">$381</text><text class="val" x="810.0" y="188.4" text-anchor="middle">$119</text><text class="val" x="990.0" y="204.6" text-anchor="middle">$502</text><text class="axis halo" x="0" y="144.6">50</text><text class="axis halo" x="0" y="73.1">100</text><text class="axis" x="180.0" y="240.0" text-anchor="middle">North America</text><text class="axis" x="540.0" y="240.0" text-anchor="middle">Europe</text><text class="axis" x="900.0" y="240.0" text-anchor="middle">APAC</text><rect class="hit" x="0.0" y="0" width="180.0" height="220.0" data-tip="North America · old · 128 forms a month at $156"/><rect class="hit" x="180.0" y="0" width="180.0" height="220.0" data-tip="North America · ours · 107 forms a month at $292"/><rect class="hit" x="360.0" y="0" width="180.0" height="220.0" data-tip="Europe · old · 41 forms a month at $311"/><rect class="hit" x="540.0" y="0" width="180.0" height="220.0" data-tip="Europe · ours · 32 forms a month at $381"/><rect class="hit" x="720.0" y="0" width="180.0" height="220.0" data-tip="APAC · old · 17 forms a month at $119"/><rect class="hit" x="900.0" y="0" width="180.0" height="220.0" data-tip="APAC · ours · 5 forms a month at $502"/><line class="hovline" y1="0" y2="220.0"/><circle class="hov t-bad" r="7"/></svg><svg viewBox="0 0 360 224" class="chart phone" role="img"><line class="grid" x1="0" x2="360.0" y1="135.7" y2="135.7"/><line class="grid" x1="0" x2="360.0" y1="71.4" y2="71.4"/><rect class="bar t-plain" style="--i:0" x="6.0" y="35.7" width="48.0" height="164.3"/><rect class="bar t-brand" style="--i:1" x="66.0" y="62.6" width="48.0" height="137.4"/><rect class="bar t-plain" style="--i:2" x="126.0" y="147.3" width="48.0" height="52.7"/><rect class="bar t-brand" style="--i:3" x="186.0" y="158.3" width="48.0" height="41.7"/><rect class="bar t-plain" style="--i:4" x="246.0" y="178.8" width="48.0" height="21.2"/><rect class="bar t-brand" style="--i:5" x="306.0" y="193.4" width="48.0" height="6.6"/><text class="val" x="30.0" y="27.7" text-anchor="middle">$156</text><text class="val" x="90.0" y="54.6" text-anchor="middle">$292</text><text class="val" x="150.0" y="139.3" text-anchor="middle">$311</text><text class="val" x="210.0" y="150.3" text-anchor="middle">$381</text><text class="val" x="270.0" y="170.8" text-anchor="middle">$119</text><text class="val" x="330.0" y="185.4" text-anchor="middle">$502</text><text class="axis halo" x="0" y="131.7">50</text><text class="axis halo" x="0" y="67.4">100</text><text class="axis" x="60.0" y="220.0" text-anchor="middle">North America</text><text class="axis" x="180.0" y="220.0" text-anchor="middle">Europe</text><text class="axis" x="300.0" y="220.0" text-anchor="middle">APAC</text><rect class="hit" x="0.0" y="0" width="60.0" height="200.0" data-tip="North America · old · 128 forms a month at $156"/><rect class="hit" x="60.0" y="0" width="60.0" height="200.0" data-tip="North America · ours · 107 forms a month at $292"/><rect class="hit" x="120.0" y="0" width="60.0" height="200.0" data-tip="Europe · old · 41 forms a month at $311"/><rect class="hit" x="180.0" y="0" width="60.0" height="200.0" data-tip="Europe · ours · 32 forms a month at $381"/><rect class="hit" x="240.0" y="0" width="60.0" height="200.0" data-tip="APAC · old · 17 forms a month at $119"/><rect class="hit" x="300.0" y="0" width="60.0" height="200.0" data-tip="APAC · ours · 5 forms a month at $502"/><line class="hovline" y1="0" y2="200.0"/><circle class="hov t-bad" r="5"/></svg><p class="cap">GA4 forms a month from Google ads by region, the old campaigns Mar to May against ours Aug 9 to Oct 6 2026, by click date; each bar&#39;s label is its cost per form <span class="legend"><span class="sw t-plain"></span>Old, Mar to May</span> <span class="legend"><span class="sw t-brand"></span>Ours, Aug 9 to Oct 6</span></p></div>
+</section>
+<section>
+  <p class="kicker anim">What was different · 6</p>
+  <h2 class="anim" style="--d:.1s">The old campaigns did 3 things ours don&#39;t</h2>
+  <div class="tiles"><div class="tile anim" style="--d:0.15s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Broad match</b><span>50% of their keyword spend was broad match, against 11% for ours, so they showed on far more searches.</span></div><div class="tile anim" style="--d:0.27s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Ads that ask for a quote</b><span>Their ads said Request a Quote Now. Ours say Free Shipping on $150+ Orders.</span></div><div class="tile anim" style="--d:0.39s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>The home page</b><span>25% of their spend went to the home page, where 3.8% of clicks became forms.</span></div><div class="tile anim" style="--d:0.51s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Not the website</b><span>Category pages turn clicks into forms like before: 2.1% then, 2.3% now.</span></div></div>
+</section>
+<section>
+  <p class="kicker anim">Countries · 7</p>
+  <h2 class="anim" style="--d:.1s">Outside the US, 5 countries made 22 fewer forms a month after the June rebuild</h2>
+  <p class="lead anim" style="--d:0.20s">Each one is back on, or has its own campaign, since late September.</p>
+  <div class="split"><div class="anim" style="--d:0.30s"><svg viewBox="0 0 780 163" class="chart big" role="img"><line class="grid" x1="0" x2="780.0" y1="103.3" y2="103.3"/><line class="grid" x1="0" x2="780.0" y1="67.5" y2="67.5"/><line class="grid" x1="0" x2="780.0" y1="31.8" y2="31.8"/><rect class="bar t-plain" style="--i:0" x="7.8" y="20.0" width="62.4" height="119.0"/><rect class="bar t-brand" style="--i:1" x="85.8" y="72.9" width="62.4" height="66.1"/><rect class="bar t-plain" style="--i:2" x="163.8" y="66.8" width="62.4" height="72.2"/><rect class="bar t-brand" style="--i:3" x="241.8" y="107.2" width="62.4" height="31.8"/><rect class="bar t-plain" style="--i:4" x="319.8" y="93.1" width="62.4" height="45.9"/><rect class="bar t-brand" style="--i:5" x="397.8" y="139.0" width="62.4" height="1.0"/><rect class="bar t-plain" style="--i:6" x="475.8" y="121.1" width="62.4" height="17.9"/><rect class="bar t-brand" style="--i:7" x="553.8" y="139.0" width="62.4" height="1.0"/><rect class="bar t-plain" style="--i:8" x="631.8" y="136.1" width="62.4" height="2.9"/><rect class="bar t-brand" style="--i:9" x="709.8" y="139.0" width="62.4" height="1.0"/><text class="axis halo" x="0" y="99.3">5</text><text class="axis halo" x="0" y="63.5">10</text><text class="axis halo" x="0" y="27.8">15</text><text class="axis" x="78.0" y="159.0" text-anchor="middle">Canada</text><text class="axis" x="234.0" y="159.0" text-anchor="middle">UK</text><text class="axis" x="390.0" y="159.0" text-anchor="middle">Malaysia</text><text class="axis" x="546.0" y="159.0" text-anchor="middle">Indonesia</text><text class="axis" x="702.0" y="159.0" text-anchor="middle">South Korea</text><rect class="hit" x="0.0" y="0" width="78.0" height="139.0" data-tip="Canada · Jan to May · 16.6 forms a month"/><rect class="hit" x="78.0" y="0" width="78.0" height="139.0" data-tip="Canada · Aug to Sep · 9.2 forms a month"/><rect class="hit" x="156.0" y="0" width="78.0" height="139.0" data-tip="UK · Jan to May · 10.1 forms a month"/><rect class="hit" x="234.0" y="0" width="78.0" height="139.0" data-tip="UK · Aug to Sep · 4.5 forms a month"/><rect class="hit" x="312.0" y="0" width="78.0" height="139.0" data-tip="Malaysia · Jan to May · 6.4 forms a month"/><rect class="hit" x="390.0" y="0" width="78.0" height="139.0" data-tip="Malaysia · Aug to Sep · 0 forms a month"/><rect class="hit" x="468.0" y="0" width="78.0" height="139.0" data-tip="Indonesia · Jan to May · 2.5 forms a month"/><rect class="hit" x="546.0" y="0" width="78.0" height="139.0" data-tip="Indonesia · Aug to Sep · 0 forms a month"/><rect class="hit" x="624.0" y="0" width="78.0" height="139.0" data-tip="South Korea · Jan to May · 0.4 forms a month"/><rect class="hit" x="702.0" y="0" width="78.0" height="139.0" data-tip="South Korea · Aug to Sep · 0 forms a month"/><line class="hovline" y1="0" y2="139.0"/><circle class="hov t-bad" r="7"/></svg><svg viewBox="0 0 360 224" class="chart phone" role="img"><line class="grid" x1="0" x2="360.0" y1="145.9" y2="145.9"/><line class="grid" x1="0" x2="360.0" y1="91.9" y2="91.9"/><line class="grid" x1="0" x2="360.0" y1="37.8" y2="37.8"/><rect class="bar t-plain" style="--i:0" x="3.6" y="20.0" width="28.8" height="180.0"/><rect class="bar t-brand" style="--i:1" x="39.6" y="100.0" width="28.8" height="100.0"/><rect class="bar t-plain" style="--i:2" x="75.6" y="90.8" width="28.8" height="109.2"/><rect class="bar t-brand" style="--i:3" x="111.6" y="151.9" width="28.8" height="48.1"/><rect class="bar t-plain" style="--i:4" x="147.6" y="130.6" width="28.8" height="69.4"/><rect class="bar t-brand" style="--i:5" x="183.6" y="200.0" width="28.8" height="1.0"/><rect class="bar t-plain" style="--i:6" x="219.6" y="173.0" width="28.8" height="27.0"/><rect class="bar t-brand" style="--i:7" x="255.6" y="200.0" width="28.8" height="1.0"/><rect class="bar t-plain" style="--i:8" x="291.6" y="195.7" width="28.8" height="4.3"/><rect class="bar t-brand" style="--i:9" x="327.6" y="200.0" width="28.8" height="1.0"/><text class="axis halo" x="0" y="141.9">5</text><text class="axis halo" x="0" y="87.9">10</text><text class="axis halo" x="0" y="33.8">15</text><text class="axis" x="36.0" y="220.0" text-anchor="middle">Canada</text><text class="axis" x="108.0" y="220.0" text-anchor="middle">UK</text><text class="axis" x="180.0" y="220.0" text-anchor="middle">Malaysia</text><text class="axis" x="252.0" y="220.0" text-anchor="middle">Indonesia</text><rect class="hit" x="0.0" y="0" width="36.0" height="200.0" data-tip="Canada · Jan to May · 16.6 forms a month"/><rect class="hit" x="36.0" y="0" width="36.0" height="200.0" data-tip="Canada · Aug to Sep · 9.2 forms a month"/><rect class="hit" x="72.0" y="0" width="36.0" height="200.0" data-tip="UK · Jan to May · 10.1 forms a month"/><rect class="hit" x="108.0" y="0" width="36.0" height="200.0" data-tip="UK · Aug to Sep · 4.5 forms a month"/><rect class="hit" x="144.0" y="0" width="36.0" height="200.0" data-tip="Malaysia · Jan to May · 6.4 forms a month"/><rect class="hit" x="180.0" y="0" width="36.0" height="200.0" data-tip="Malaysia · Aug to Sep · 0 forms a month"/><rect class="hit" x="216.0" y="0" width="36.0" height="200.0" data-tip="Indonesia · Jan to May · 2.5 forms a month"/><rect class="hit" x="252.0" y="0" width="36.0" height="200.0" data-tip="Indonesia · Aug to Sep · 0 forms a month"/><rect class="hit" x="288.0" y="0" width="36.0" height="200.0" data-tip="South Korea · Jan to May · 0.4 forms a month"/><rect class="hit" x="324.0" y="0" width="36.0" height="200.0" data-tip="South Korea · Aug to Sep · 0 forms a month"/><line class="hovline" y1="0" y2="200.0"/><circle class="hov t-bad" r="5"/></svg><p class="cap">GA4 forms a month from Google ads by searcher country, Jan to May against Aug to Sep 2026 <span class="legend"><span class="sw t-plain"></span>Jan to May</span> <span class="legend"><span class="sw t-brand"></span>Aug to Sep</span></p></div><div class="months anim" style="--d:0.40s"><p class="cap top">Fixed on</p><div><span>Canada</span><b>Oct 5</b></div><div><span>UK</span><b>Oct 5</b></div><div><span>Malaysia</span><b>Sep 30</b></div><div><span>Indonesia</span><b>Sep 30</b></div><div><span>South Korea</span><b>Oct 7</b></div></div></div>
+</section>
+<section>
+  <p class="kicker anim">What changed Monday · 8</p>
+  <h2 class="anim" style="--d:.1s">5 changes on Monday, Oct 5</h2>
+  <div class="tiles"><div class="tile anim" style="--d:0.15s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Brand budgets</b><span>Brand North America cut from $280 to $140 a day.</span></div><div class="tile anim" style="--d:0.27s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Canada and UK on their own</b><span>New campaigns at $90 and $60 a day, out of North America and Europe.</span></div><div class="tile anim" style="--d:0.39s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Old winners back</b><span>Old keywords that brought forms before, back on in 7 campaigns.</span></div><div class="tile anim" style="--d:0.51s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Brand ads to home pages</b><span>North America and APAC brand ads now land on the regional home page.</span></div><div class="tile anim" style="--d:0.63s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Competitors trimmed</b><span>18 competitor keywords paused.</span></div></div>
+</section>
+<section>
+  <p class="kicker anim">What changed Wednesday · 9</p>
+  <h2 class="anim" style="--d:.1s">6 changes on Wednesday, Oct 7</h2>
+  <div class="tiles"><div class="tile anim" style="--d:0.15s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Brand budgets back up</b><span>Brand North America lost 66% of its impressions to budget at $140, so all four brand campaigns are back at their Oct 1 budgets.</span></div><div class="tile anim" style="--d:0.27s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Eloqua IDs</b><span>Canada and the UK now carry your IDs, so Skai counts their leads.</span></div><div class="tile anim" style="--d:0.39s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>4 new countries</b><span>South Korea and Thailand in every APAC campaign. Isaac added India to brand APAC and Mexico to brand North America.</span></div><div class="tile anim" style="--d:0.51s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Oregon back on</b><span>Oregon was left out of North America on Oct 2. It is back in.</span></div><div class="tile anim" style="--d:0.63s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>An old keyword unblocked</b><span>A negative kept pfeiffer vacuum from showing in North America. It is off.</span></div><div class="tile anim" style="--d:0.75s"><svg viewBox="0 0 24 24" class="ck" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Junk searches blocked</b><span>11 searches that brought no forms in 90 days, added as negatives.</span></div></div>
+</section>
+<section>
+  <p class="kicker anim">The plan</p>
+  <h2 class="anim" style="--d:.1s">We fix our campaigns this week and report on Monday</h2>
+  <ol class="fixes"><li class="anim" style="--d:0.20s"><i>1</i><div><b>Skai MQLs</b><span>We send Gosia our Eloqua IDs to map in Skai, so MQLs import for our campaigns again.</span></div><em class="when">Oct 8</em></li><li class="anim" style="--d:0.35s"><i>2</i><div><b>Ads and keywords</b><span>We rewrite 79 of our 106 non-brand ads around Request a Quote, and add broad match back on spring&#39;s best keywords.</span></div><em class="when">Oct 9</em></li><li class="anim" style="--d:0.50s"><i>3</i><div><b>Bidding</b><span>A cost per form target on each non-brand campaign, and 5 small campaigns merged so bidding has enough forms.</span></div><em class="when">Oct 12</em></li><li class="anim" style="--d:0.65s"><i>4</i><div><b>Report back</b><span>On the Monday call: the full week of Oct 4 to Oct 10, the first days of the fixes and the new countries, and a home page test for your OK.</span></div><em class="when">Oct 12</em></li></ol>
+</section>
+</div><nav><i></i></nav><div class="hint">← → or click to move</div><div class="count"></div><div class="tip"></div>
+<script>
+/* The deck's moves (the Mokomoko recovery deck, 2026-10-02).
+   - The stage (a laptop): one slide at a time, scaled to fit; arrow keys, a click (right two thirds: next, left
+     third: back), or a swipe move it. The progress bar, the counter, and the address (#3) follow.
+   - The page (a phone; the same media query as deck.css): every slide is shown, one under the other. A slide
+     animates in once it scrolls into view. Clicks and swipes do not move anything; #3 scrolls to slide 3.
+   - Charts: a hover (or a tap) shows the slot's tip, a line at the slot, and the point's dot. A toggle switches the
+     views of one chart and draws the new view in again. */
+const S = [...document.querySelectorAll('section')], stage = document.querySelector('.stage');
+const bar = document.querySelector('nav i'), cnt = document.querySelector('.count'), tip = document.querySelector('.tip');
+const PAGE = matchMedia('screen and (max-width:1087px), screen and (max-height:611px)');
+let n = 0;
+const seen = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add('active'); seen.unobserve(e.target); }
+}), { rootMargin: '0px 0px -8% 0px' });
+function fit() {
+  if (PAGE.matches) { stage.style.transform = ''; return; }
+  const s = Math.min(innerWidth / 1280, innerHeight / 720);
+  stage.style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+function go(i) {
+  n = Math.max(0, Math.min(S.length - 1, i));
+  if (PAGE.matches) { if (n > 0) S[n].scrollIntoView({ block: 'start' }); return; }
+  S.forEach((s, j) => s.classList.toggle('active', j === n));
+  bar.style.width = ((n + 1) / S.length * 100) + '%';
+  cnt.textContent = (n + 1) + ' / ' + S.length;
+  history.replaceState(null, '', '#' + (n + 1));
+}
+function layout() {
+  fit();
+  if (PAGE.matches) S.forEach(s => { if (!s.classList.contains('active')) seen.observe(s); });
+  else { seen.disconnect(); go(n); }
+}
+addEventListener('keydown', e => {
+  if (PAGE.matches) return;
+  if (['ArrowRight', 'PageDown', ' '].includes(e.key)) go(n + 1);
+  if (['ArrowLeft', 'PageUp'].includes(e.key)) go(n - 1);
+  if (e.key === 'Home') go(0);
+  if (e.key === 'End') go(S.length - 1);
+});
+document.querySelectorAll('.toggle button').forEach(b => b.addEventListener('click', e => {
+  e.stopPropagation();
+  const w = b.closest('.views');
+  w.querySelectorAll('.toggle button').forEach(x => x.classList.toggle('on', x === b));
+  w.querySelectorAll('.v').forEach(v => {
+    const on = v.dataset.k === b.dataset.v;
+    if (on && !v.classList.contains('on')) { const c = v.cloneNode(true); c.classList.add('on'); v.replaceWith(c); }
+    else if (!on) v.classList.remove('on');
+  });
+}));
+addEventListener('click', e => {
+  if (PAGE.matches || e.target.closest('a,button,.toggle')) return;
+  go(e.clientX > innerWidth / 3 ? n + 1 : n - 1);
+});
+let x0 = null;
+addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+addEventListener('touchend', e => {
+  if (x0 === null || PAGE.matches) { x0 = null; return; }
+  const dx = e.changedTouches[0].clientX - x0;
+  if (Math.abs(dx) > 40) go(dx < 0 ? n + 1 : n - 1);
+  x0 = null;
+});
+function hover(e) {
+  const h = e.target.closest && e.target.closest('[data-tip]');
+  document.querySelectorAll('.chart.hovering').forEach(c => { if (!h || !c.contains(h)) c.classList.remove('hovering'); });
+  if (!h) { tip.classList.remove('on'); return; }
+  const svg = h.ownerSVGElement, line = svg.querySelector('.hovline'), dot = svg.querySelector('.hov');
+  const x = +h.getAttribute('x') + (+h.getAttribute('width')) / 2;
+  svg.classList.add('hovering');
+  line.setAttribute('x1', x); line.setAttribute('x2', x);
+  if (h.dataset.cx) { dot.setAttribute('cx', h.dataset.cx); dot.setAttribute('cy', h.dataset.cy); dot.classList.add('on'); }
+  else dot.classList.remove('on');
+  tip.textContent = h.dataset.tip;
+  const half = Math.min(tip.offsetWidth / 2 + 8, innerWidth / 2);
+  tip.style.left = Math.min(Math.max(e.clientX, half), innerWidth - half) + 'px';
+  tip.style.top = e.clientY + 'px';
+  tip.classList.add('on');
+}
+addEventListener('pointermove', hover);
+addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') hover(e); });
+addEventListener('resize', fit);
+PAGE.addEventListener('change', layout);
+n = Math.max(0, Math.min(S.length - 1, (parseInt(location.hash.slice(1)) || 1) - 1));
+if (PAGE.matches) { S.forEach(s => s.classList.remove('active')); }
+layout();
+if (PAGE.matches) go(n);
+/* The font changes the page's height once it is in: scroll to the slide again. */
+if (document.fonts) document.fonts.ready.then(() => { if (PAGE.matches) go(n); });
+</script></body></html>
